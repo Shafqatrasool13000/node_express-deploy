@@ -16,9 +16,7 @@ const errorHandler = require('./middleware/error-handler');
 app.use(express.json());
 
 // routes
-app.get('/', () => {
-    res.send('Hello World')
-})
+
 app.use('/api/v1/products', products);
 app.use('/api/v1', users);
 
