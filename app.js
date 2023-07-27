@@ -2,6 +2,7 @@ require('dotenv').config();
 require('express-async-errors')
 
 const express = require('express');
+const cors = require('cors')
 const app = express();
 
 const products = require('./routes/products');
@@ -15,7 +16,7 @@ const errorHandler = require('./middleware/error-handler');
 
 // middleware
 app.use(express.json());
-
+app.use(cors())
 // routes
 app.get('/', (req, res) => {
     res.send('<h1>Welcome!</h1>');
