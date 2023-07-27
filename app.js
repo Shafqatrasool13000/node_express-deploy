@@ -6,6 +6,7 @@ const app = express();
 
 const products = require('./routes/products');
 const users = require('./routes/users');
+const utils = require('./routes/utils');
 
 const connectDB = require('./db/connect');
 const notFound = require('./middleware/not-found');
@@ -19,6 +20,7 @@ app.use(express.json());
 
 app.use('/api/v1/products', products);
 app.use('/api/v1', users);
+app.use('/api/v1', utils);
 
 app.use(notFound);
 app.use(errorHandler)
