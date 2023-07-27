@@ -17,7 +17,9 @@ const errorHandler = require('./middleware/error-handler');
 app.use(express.json());
 
 // routes
-
+app.get('/', (req, res) => {
+    res.send('<h1>Welcome!</h1>');
+})
 app.use('/api/v1/products', products);
 app.use('/api/v1', users);
 app.use('/api/v1', utils);
@@ -27,7 +29,7 @@ app.use(errorHandler)
 
 
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 6000;
 
 const start = async () => {
     try {
