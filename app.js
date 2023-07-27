@@ -23,7 +23,7 @@ app.get('/', (req, res) => {
 })
 app.use('/api/v1/products', products);
 app.use('/api/v1', users);
-app.use('/api/v1', utils);
+app.use('/api/v1/auth', utils);
 
 app.use(notFound);
 app.use(errorHandler)

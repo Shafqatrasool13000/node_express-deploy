@@ -21,7 +21,7 @@ const loginValidations = [
 ]
 
 router.post('/signup', signupValidations, signup);
-router.post('/login', loginValidations, login);
+router.post('/signin', loginValidations, login);
 
 
 module.exports = router;
