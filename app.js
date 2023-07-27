@@ -22,8 +22,8 @@ app.get('/', (req, res) => {
     res.send('<h1>Welcome!</h1>');
 })
 app.use('/api/v1/products', products);
-app.use('/api/v1', users);
-app.use('/api/v1/auth', utils);
+app.use('/api/v1/auth', users);
+app.use('/api/v1', utils);
 
 app.use(notFound);
 app.use(errorHandler)
