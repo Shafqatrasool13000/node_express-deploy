@@ -39,7 +39,7 @@ const signup = async (req, res) => {
     })
 }
 
-const login = async (req, res) => {
+const signin = async (req, res) => {
     const {
         username,
         password
@@ -101,5 +101,5 @@ const login = async (req, res) => {
 }
 
 module.exports = {
-    signup, login
+    signup, signin
 }

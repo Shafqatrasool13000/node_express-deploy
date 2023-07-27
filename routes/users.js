@@ -1,5 +1,5 @@
 const express = require('express');
-const { signup, login } = require('../controllers/user');
+const { signup, signin } = require('../controllers/user');
 const { body } = require('express-validator');
 const { validationFinder } = require('../utils/utils');
 
@@ -21,7 +21,7 @@ const loginValidations = [
 ]
 
 router.post('/signup', signupValidations, signup);
-router.post('/signin', loginValidations, login);
+router.post('/signin', loginValidations, signin);
 
 
 module.exports = router;
