@@ -1,6 +1,35 @@
 const { validationResult } = require('express-validator');
-const User = require('../models/user.js');
+const User = require('../models/authModel');
 const bcrypt = require('bcryptjs');
+const otpGenerator = require('otp-generator')
+
+
+
+const generateOtp = () => {
+    const otp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false });
+
+}
+
+const verifyOtp = (req, res) => {
+    const { otp } = req.body;
+    if (otp == 1111) {
+        res.status(200).send({
+            "responseCode": "200",
+            "responseMessage": "Otp verified successfully",
+            "execTime": 172,
+            "errors": null,
+            "results": null
+        })
+    }
+    res.status(422).send({
+        "responseCode": "422",
+        "responseMessage": "Bad credentials",
+        "execTime": 116,
+        "errors": null,
+        "results": null
+    })
+
+}
 
 const signup = async (req, res) => {
     const {
@@ -40,6 +69,8 @@ const signup = async (req, res) => {
 }
 
 const signin = async (req, res) => {
+    console.log("latest otp")
+
     const {
         username,
         password
@@ -52,11 +83,14 @@ const signin = async (req, res) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
+    console.log("latest otp")
+
     const existedUser = await User.findOne({ username });
 
     if (existedUser) {
         const matchPassword = await bcrypt.compare(password, existedUser.password);
         if (matchPassword) {
+            req.session.isLogged = true;
             return res.status(200).json({
                 "responseCode": "200",
                 "responseMessage": "You have successfully logged in.",
@@ -97,9 +131,11 @@ const signin = async (req, res) => {
             })
         }
     }
+
     res.status(404).json({ message: 'Invalid Email or Password' });
 }
 
 module.exports = {
-    signup, signin
+    signup, signin, generateOtp,
+    verifyOtp
 }
