@@ -1,19 +1,17 @@
 const { validationResult } = require('express-validator');
-const User = require('../models/authModel');
-const bcrypt = require('bcryptjs');
+const User = require('../models/userModel');
 const otpGenerator = require('otp-generator')
-
-
+const { StatusCodes } = require('http-status-codes')
+const { UnauthenticatedError } = require('../errors')
 
 const generateOtp = () => {
     const otp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false });
-
 }
 
 const verifyOtp = (req, res) => {
     const { otp } = req.body;
     if (otp == 1111) {
-        res.status(200).send({
+        res.status(StatusCodes.OK).send({
             "responseCode": "200",
             "responseMessage": "Otp verified successfully",
             "execTime": 172,
@@ -21,7 +19,7 @@ const verifyOtp = (req, res) => {
             "results": null
         })
     }
-    res.status(422).send({
+    res.status(StatusCodes.BAD_REQUEST).send({
         "responseCode": "422",
         "responseMessage": "Bad credentials",
         "execTime": 116,
@@ -45,13 +43,13 @@ const signup = async (req, res) => {
 
     // If there are validation errors, respond with a 400 Bad Request status and the error messages
     if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        return res.status(StatusCodes.BAD_REQUEST).json({ errors: errors.array() });
     }
     const userExist = await User.findOne({ $or: [{ emailAddress }, { username }], });
     if (userExist) {
-        return res.status(409).json({ message: 'User with the provided email or username already exists.' });
+        return res.status(StatusCodes.CONFLICT).json({ message: 'User with the provided email or username already exists.' });
     }
-    const hashedPassword = await bcrypt.hash(password, 12);
+
     // Create a new user instance based on the User model
     const newUser = new User({
         firstName,
@@ -59,17 +57,16 @@ const signup = async (req, res) => {
         emailAddress,
         phoneNumber,
         username,
-        password: hashedPassword,
+        password,
     });
     // Save the new user to the database
     const savedUser = await newUser.save();
-    res.status(201).json({
+    res.status(StatusCodes.CREATED).json({
         user: savedUser
     })
 }
 
 const signin = async (req, res) => {
-    console.log("latest otp")
 
     const {
         username,
@@ -77,21 +74,25 @@ const signin = async (req, res) => {
     } = req.body;
 
     const errors = validationResult(req);
-    console.log(errors.array())
 
     if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        return res.status(StatusCodes.BAD_REQUEST).json({ errors: errors.array() });
     }
 
-    console.log("latest otp")
+    const userExist = await User.findOne({ username });
 
-    const existedUser = await User.findOne({ username });
+    if (userExist) {
+        // compare password
+        const matchPassword = await userExist.comparePassword(password);
 
-    if (existedUser) {
-        const matchPassword = await bcrypt.compare(password, existedUser.password);
+        if (!matchPassword) {
+            throw new UnauthenticatedError('Invalid Credentials')
+        }
+
         if (matchPassword) {
-            req.session.isLogged = true;
-            return res.status(200).json({
+            const token = userExist.createJWT();
+            s
+            return res.status(StatusCodes.OK).json({
                 "responseCode": "200",
                 "responseMessage": "You have successfully logged in.",
                 "execTime": 172,
@@ -105,7 +106,7 @@ const signin = async (req, res) => {
                     },
                     "ProfessionalDetails": null,
                     "jwtDetails": {
-                        "token": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJob3VzZXVwIiwiaWF0IjoxNjkwMzU2ODQyLCJleHAiOjE2OTA1MjI0NDJ9.JTuYFk45mFJTgB9Vt2XOqqLjD_V_wmfJlVcAaUFf-MBTVHtz9ah2u9J56UhKMRi8sOFLcCPDw7EwgDVdvTZUQw",
+                        token,
                         "refreshToken": "a8b8db83-501f-4577-baa6-6abd5dd56db8",
                         "type": "Bearer"
                     },
@@ -117,7 +118,7 @@ const signin = async (req, res) => {
                         "availablePlans": null
                     },
                     "userDetails": {
-                        "id": 2,
+                        "id": userExist._id,
                         "username": "houseup",
                         "userSecretId": "2ca9312e-e763-465b-9141-53affecb3e60-2124d73b-73c5-4bb4-9f95-5c1ca725b62a",
                         "email": "info@houseup.ca",
@@ -132,7 +133,7 @@ const signin = async (req, res) => {
         }
     }
 
-    res.status(404).json({ message: 'Invalid Email or Password' });
+    res.status(StatusCodes.NOT_FOUND).json({ message: 'Invalid Email or Password' });
 }
 
 module.exports = {

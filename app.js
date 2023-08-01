@@ -1,57 +1,70 @@
 require('dotenv').config();
-require('express-async-errors')
+require('express-async-errors');
+
+// extra security packages
+const helmet = require('helmet');
+const cors = require('cors');
+const xss = require('xss-clean');
+const rateLimiter = require('express-rate-limit');
+
+// Swagger
+// const swaggerUI = require('swagger-ui-express');
+// const YAML = require('yamljs');
+// const swaggerDocument = YAML.load('./swagger.yaml');
 
 const express = require('express');
-const cors = require('cors')
-const session = require('express-session');
-const MongodbStore = require('connect-mongodb-session')(session)
 const app = express();
 
-const auth = require('./src/routes/authRoutes');
-const utils = require('./src/routes/utilRoutes');
+const connectDB = require('./db/connect');
+const authenticateUser = require('./middleware/authentication');
+// routers
+const authRouter = require('./routes/authRoutes');
+const tourGuideRouter = require('./routes/tourGuideRoutes');
+const jobsRouter = require('./routes/jobs');
+const adminRouter = require('./routes/adminRoutes');
 
-const connectDB = require('./src/db/connect');
-const notFound = require('./src/middleware/not-found');
-const errorHandler = require('./src/middleware/error-handler');
+// error handler
+const notFoundMiddleware = require('./middleware/not-found');
+const errorHandlerMiddleware = require('./middleware/error-handler');
+const auth = require('./middleware/authentication');
 
-
-// middleware
+// app.set('trust proxy', 1);
+app.use(
+  rateLimiter({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+  })
+);
 app.use(express.json());
+app.use(helmet());
+app.use(cors());
+app.use(xss());
 
-// mongodb store setup for session
-const store = new MongodbStore({
-    uri: process.env.MONGO_URI,
-    collection: 'sessions'
-})
-app.use(cors()); 1
-app.use(session({
-    secret: 'ev_web_secret', resave: false, saveUninitialized: false, store
-}))
+app.get('/', (req, res) => {
+  res.send('<h1>Jobs API</h1><a href="/api-docs">Documentation</a>');
+});
+// app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
 // routes
-app.get('/', (req, res) => {
-    res.send('<h1>Welcome to Ev Web!</h1>');
-})
+app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/jobs', authenticateUser, jobsRouter);
+app.use('/api/v1/getTourGuide', auth, tourGuideRouter);
+app.use('/api/v1/admin', auth, adminRouter);
 
-app.use('/api/v1/auth', auth);
-app.use('/api/v1', utils);
-
-app.use(notFound);
-app.use(errorHandler)
-
-
+app.use(notFoundMiddleware);
+app.use(errorHandlerMiddleware);
 
 const port = process.env.PORT || 5000;
 
 const start = async () => {
-    try {
-        await connectDB(process.env.MONGO_URI);
-        app.listen(port, () =>
-            console.log(`Server is listening on port ${port}...`)
-        );
-    } catch (error) {
-        console.log(error);
-    }
+  try {
+    await connectDB(process.env.MONGO_URI);
+    app.listen(port, () =>
+      console.log(`Server is listening on port ${port}...`)
+    );
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 start();
