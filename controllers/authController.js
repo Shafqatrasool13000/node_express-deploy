@@ -29,13 +29,14 @@ const verifyOtp = (req, res) => {
 
 }
 
+// sigup controller
 const signup = async (req, res) => {
     const {
         firstName,
         lastName,
         emailAddress,
         phoneNumber,
-        username,
+        userName,
         password
     } = req.body;
 
@@ -45,9 +46,9 @@ const signup = async (req, res) => {
     if (!errors.isEmpty()) {
         return res.status(StatusCodes.BAD_REQUEST).json({ errors: errors.array() });
     }
-    const userExist = await User.findOne({ $or: [{ emailAddress }, { username }], });
+    const userExist = await User.findOne({ $or: [{ emailAddress }, { userName }, { phoneNumber }], });
     if (userExist) {
-        return res.status(StatusCodes.CONFLICT).json({ message: 'User with the provided email or username already exists.' });
+        return res.status(StatusCodes.CONFLICT).json({ message: 'User with the provided email,phone or username already exists.' });
     }
 
     // Create a new user instance based on the User model
@@ -56,7 +57,7 @@ const signup = async (req, res) => {
         lastName,
         emailAddress,
         phoneNumber,
-        username,
+        userName,
         password,
     });
     // Save the new user to the database
@@ -66,10 +67,11 @@ const signup = async (req, res) => {
     })
 }
 
+// sigin controller
 const signin = async (req, res) => {
 
     const {
-        username,
+        userName,
         password
     } = req.body;
 
@@ -79,7 +81,7 @@ const signin = async (req, res) => {
         return res.status(StatusCodes.BAD_REQUEST).json({ errors: errors.array() });
     }
 
-    const userExist = await User.findOne({ username });
+    const userExist = await User.findOne({ userName });
 
     if (userExist) {
         // compare password
@@ -91,12 +93,8 @@ const signin = async (req, res) => {
 
         if (matchPassword) {
             const token = userExist.createJWT();
-            s
             return res.status(StatusCodes.OK).json({
-                "responseCode": "200",
                 "responseMessage": "You have successfully logged in.",
-                "execTime": 172,
-                "errors": null,
                 "results": {
                     "tourGuide": {
                         "story": true,
@@ -119,7 +117,7 @@ const signin = async (req, res) => {
                     },
                     "userDetails": {
                         "id": userExist._id,
-                        "username": "houseup",
+                        "username": userName,
                         "userSecretId": "2ca9312e-e763-465b-9141-53affecb3e60-2124d73b-73c5-4bb4-9f95-5c1ca725b62a",
                         "email": "info@houseup.ca",
                         "phoneNumber": "9052593363",

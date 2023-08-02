@@ -12,13 +12,13 @@ const signupValidations = [
     body('lastName', validationFinder('USER_LASTNAME').patternMsg).trim().notEmpty().withMessage(validationFinder('USER_LASTNAME').notBlankMsg).matches(validationFinder('USER_LASTNAME').pattern),
     body('emailAddress', validationFinder('EMAIL_ADDRESS').patternMsg).isEmail().normalizeEmail().trim().notEmpty().withMessage(validationFinder('EMAIL_ADDRESS').notBlankMsg).matches(validationFinder('EMAIL_ADDRESS').pattern),
     body('phoneNumber', validationFinder('PHONE_NUMBER').notBlankMsg).trim().notEmpty().withMessage(validationFinder('PHONE_NUMBER').notBlankMsg).matches(validationFinder('PHONE_NUMBER').pattern),
-    body('username', validationFinder('USER_NAME').notBlankMsg).trim().notEmpty().withMessage(validationFinder('USER_NAME').notBlankMsg).matches(validationFinder('USER_NAME').pattern),
+    body('userName', validationFinder('USER_NAME').notBlankMsg).trim().notEmpty().withMessage(validationFinder('USER_NAME').notBlankMsg).matches(validationFinder('USER_NAME').pattern),
     body('password', validationFinder('PASSWORD').patternMsg).trim().notEmpty().withMessage(validationFinder('PASSWORD').notBlankMsg).matches(validationFinder('PASSWORD').pattern)
 ];
 
 // signin Validations
 const loginValidations = [
-    body('username', validationFinder('USER_NAME').patternMsg).trim().notEmpty().withMessage(validationFinder('USER_NAME').notBlankMsg).matches(validationFinder('USER_NAME').pattern),
+    body('userName', validationFinder('USER_NAME').patternMsg).trim().notEmpty().withMessage(validationFinder('USER_NAME').notBlankMsg).matches(validationFinder('USER_NAME').pattern),
     body('password', validationFinder('PASSWORD').patternMsg).trim().notEmpty().withMessage(validationFinder('PASSWORD').notBlankMsg).matches(validationFinder('PASSWORD').pattern)
 ]
 

@@ -1,5 +1,6 @@
 require('dotenv').config();
 require('express-async-errors');
+const path = require('path');
 
 // extra security packages
 const helmet = require('helmet');
@@ -22,6 +23,7 @@ const authRouter = require('./routes/authRoutes');
 const tourGuideRouter = require('./routes/tourGuideRoutes');
 const jobsRouter = require('./routes/jobs');
 const adminRouter = require('./routes/adminRoutes');
+const userRouter = require('./routes/userRoutes');
 
 // error handler
 const notFoundMiddleware = require('./middleware/not-found');
@@ -36,6 +38,11 @@ app.use(
   })
 );
 app.use(express.json());
+// Define the path to your images directory
+const imagesDirectory = path.join(__dirname, 'images');
+
+// Serve the images directory as a static folder
+app.use('/images', express.static(imagesDirectory));
 app.use(helmet());
 app.use(cors());
 app.use(xss());
@@ -50,6 +57,7 @@ app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/jobs', authenticateUser, jobsRouter);
 app.use('/api/v1/getTourGuide', auth, tourGuideRouter);
 app.use('/api/v1/admin', auth, adminRouter);
+app.use('/api/v1/user', auth, userRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);

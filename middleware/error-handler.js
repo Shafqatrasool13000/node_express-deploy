@@ -15,7 +15,7 @@ const errorHandlerMiddleware = (err, req, res, next) => {
     CustomErrors.statusCode = StatusCodes.BAD_REQUEST;
   }
   if (err.name === 'CastError') {
-    CustomErrors.msg = `job with id ${err.value} does not exist`;
+    CustomErrors.msg = `item with id ${err.value} does not exist`;
     CustomErrors.statusCode = StatusCodes.NOT_FOUND;
 
   }

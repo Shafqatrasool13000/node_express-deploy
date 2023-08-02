@@ -14,9 +14,9 @@ exports.appData = {
         "propertyMinVideoAllowed": 0,
         "propertyMaxVideoAllowed": 1,
         "imagesAllowedFormatList": [
-            "JPEG",
-            "JPG",
-            "PNG"
+            "image/jpeg",
+            "image/jpg",
+            "image/png"
         ],
         "videosAllowedFormatList": [
             "MP4"

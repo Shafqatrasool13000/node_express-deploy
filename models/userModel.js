@@ -24,7 +24,7 @@ const UserSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    username: {
+    userName: {
         type: String,
         required: true,
         trim: true
@@ -37,7 +37,17 @@ const UserSchema = new mongoose.Schema({
     otp: {
         type: String,
         trim: true
-    }
+    },
+    country: { type: String, default: 'Pakistan', trim: true },
+    createdBy: { type: String, default: null, trim: true },
+    profilePicture: { type: String, default: null, trim: true },
+    countryCode: { type: String, default: null, trim: true },
+    deletedDateTime: { type: Date, default: null, trim: true },
+    isDeleted: { type: Boolean, default: false, trim: true },
+    userStatusId: { type: Number, default: 1, trim: true },
+    updatedBy: { type: String, default: null, trim: true },
+}, {
+    timestamps: true
 });
 
 
@@ -48,7 +58,7 @@ UserSchema.pre('save', async function () {
 
 UserSchema.methods.createJWT = function () {
     return jwt.sign(
-        { userId: this._id, username: this.username },
+        { userId: this._id, userName: this.userName },
         process.env.JWT_SECRET,
         {
             expiresIn: process.env.TOKEN_LIFETIME,
