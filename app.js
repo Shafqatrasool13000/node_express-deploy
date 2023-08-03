@@ -24,6 +24,8 @@ const tourGuideRouter = require('./routes/tourGuideRoutes');
 const jobsRouter = require('./routes/jobs');
 const adminRouter = require('./routes/adminRoutes');
 const userRouter = require('./routes/userRoutes');
+const postRouter = require('./routes/postRoutes');
+const storyRouter = require('./routes/storyRoutes');
 
 // error handler
 const notFoundMiddleware = require('./middleware/not-found');
@@ -40,9 +42,11 @@ app.use(
 app.use(express.json());
 // Define the path to your images directory
 const imagesDirectory = path.join(__dirname, 'images');
+const videosDirectory = path.join(__dirname, 'videos');
 
 // Serve the images directory as a static folder
 app.use('/images', express.static(imagesDirectory));
+app.use('/videos', express.static(imagesDirectory));
 app.use(helmet());
 app.use(cors());
 app.use(xss());
@@ -58,6 +62,8 @@ app.use('/api/v1/jobs', authenticateUser, jobsRouter);
 app.use('/api/v1/getTourGuide', auth, tourGuideRouter);
 app.use('/api/v1/admin', auth, adminRouter);
 app.use('/api/v1/user', auth, userRouter);
+app.use('/api/v1/story', auth, storyRouter);
+app.use('/api/v1/post', auth, postRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);

@@ -1,6 +1,6 @@
 const express = require('express');
 const { signup, signin, generateOtp,
-    verifyOtp } = require('../controllers/authController');
+    verifyOtp } = require('../controllers/authControllers');
 const { body } = require('express-validator');
 const { validationFinder } = require('../utils/utils.js');
 

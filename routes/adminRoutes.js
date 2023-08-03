@@ -1,6 +1,6 @@
 const express = require('express');
 const { body } = require('express-validator');
-const { getAllUsers, getUserDetails, searchUser, updateUserStatus, updateUser } = require('../controllers/adminController');
+const { getAllUsers, getUserDetails, searchUser, updateUserStatus, updateUser } = require('../controllers/adminControllers');
 const { validationFinder } = require('../utils/utils');
 
 const router = express.Router();
