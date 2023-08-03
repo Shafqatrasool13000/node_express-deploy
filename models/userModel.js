@@ -39,7 +39,7 @@ const UserSchema = new mongoose.Schema({
         trim: true
     },
     country: { type: String, default: 'Pakistan', trim: true },
-    createdBy: { type: String, default: null, trim: true },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, default: null, trim: true },
     profilePicture: { type: String, default: null, trim: true },
     countryCode: { type: String, default: null, trim: true },
     deletedDateTime: { type: Date, default: null, trim: true },

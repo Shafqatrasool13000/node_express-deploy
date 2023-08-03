@@ -2,6 +2,7 @@ const { StatusCodes } = require("http-status-codes");
 const User = require("../models/userModel");
 const { BadRequestError } = require("../errors");
 const { validationResult } = require("express-validator");
+const { deleteFile } = require("../utils/file");
 
 // upload profile controller
 const userUploadProfileController = async (req, res) => {
@@ -20,6 +21,7 @@ const userUploadProfileController = async (req, res) => {
     if (!user) {
         throw new BadRequestError(`user with id ${userId} not found`);
     }
+    deleteFile(user.profilePicture);
     const profilePictureUrl = req.file.path.replace(/\\/g, '/');
 
     user.profilePicture = profilePictureUrl;
