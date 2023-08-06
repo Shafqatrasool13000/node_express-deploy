@@ -8,10 +8,26 @@ const deleteFile = () => {
 }
 
 // file url clearner
-const fileUrlClear = (filePath) => {
+const fileUrlCleaner = (filePath) => {
     return filePath.replace(/\\/g, '/');
 }
+
+// check file type
+
+const storageByFileType = (mimeType) => {
+    const fileType = mimeType.includes('image');
+
+    if (fileType) {
+        return 'images';
+    } else if (mimeType.includes('video')) {
+        return 'videos';
+    } else {
+        return 'assets'; // Default storage type
+    }
+}
+
 module.exports = {
     deleteFile,
-    fileUrlClear
+    fileUrlCleaner,
+    storageByFileType
 }

@@ -1,27 +1,24 @@
 const express = require('express');
-const { body } = require('express-validator');
+const { body, param } = require('express-validator');
 const { createPostController, deletePostController, editPostController, postDetailsController,
     postListController } = require('../controllers/postControllers');
-const { validationFinder } = require('../utils/utils');
-const { multerImageMiddleware, multerVideoMiddleware } = require('../utils/multer.config');
+const { multerMiddleware } = require('../utils/multer.config');
 
 const router = express.Router();
 
-// post validations
-const postValidation = [
-    body('userId').notEmpty().withMessage("userId is required").isString().withMessage("userId should be string").trim(),
-    body('firstName', validationFinder('USER_FIRSTNAME').patternMsg).trim().notEmpty().withMessage(validationFinder('USER_FIRSTNAME').notBlankMsg).matches(validationFinder('USER_FIRSTNAME').pattern),
+// post detail Validation
+const postDetailValidation = [
+    param('postId').notEmpty().withMessage("postId is required").isString().withMessage("postId should be string").trim(),
 ];
-const deletePostValidation = [
-    body('userId').notEmpty().withMessage("userId is required").isString().withMessage("userId should be string").trim(),
-    body('firstName', validationFinder('USER_FIRSTNAME').patternMsg).trim().notEmpty().withMessage(validationFinder('USER_FIRSTNAME').notBlankMsg).matches(validationFinder('USER_FIRSTNAME').pattern),
+// post delete Validation
+const postDeleteValidation = [
+    body('postId').notEmpty().withMessage("postId is required").isString().withMessage("postId should be string").trim(),
 ];
-
-router.post('/create', multerImageMiddleware.array('images', 12), multerVideoMiddleware.single('videos'), createPostController);
-router.put('/edit', multerImageMiddleware.array('images', 12), editPostController);
-router.post('/:postId', postDetailsController);
-router.delete('/delete', deletePostController);
-router.post('/list', postListController);
+router.post('/create', multerMiddleware.fields([{ name: 'images', maxCount: 12 }, { name: 'video', maxCount: 1 }]), createPostController);
+router.post('/edit', multerMiddleware.fields([{ name: 'images', maxCount: 12 }, { name: 'video', maxCount: 1 }]), editPostController);
+router.delete('/delete', postDeleteValidation, deletePostController);
+router.get('/list', postListController);
+router.get('/:postId', postDetailValidation, postDetailsController);
 
 module.exports = router;
 

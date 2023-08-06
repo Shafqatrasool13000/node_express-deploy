@@ -1,8 +1,7 @@
 const express = require('express');
 const { body } = require('express-validator');
-const { validationFinder } = require('../utils/utils');
-const { multerImageMiddleware, multerVideoMiddleware } = require('../utils/multer.config');
-const { createStoryController, deleteStoryController } = require('../controllers/storyControllers');
+const { multerMiddleware } = require('../utils/multer.config');
+const { createStoryController, deleteStoryController, storyListController } = require('../controllers/storyControllers');
 
 const router = express.Router();
 
@@ -41,9 +40,13 @@ const router = express.Router();
 //     body('data.hideLikesAndViewsCounts').isBoolean().withMessage("hideLikesAndViewsCounts should be true or false").notEmpty().withMessage('hideLikesAndViewsCounts cannot be blank').trim()
 
 // ];
-
-router.post('/create', multerImageMiddleware.single('media'), createStoryController);
-router.delete('/delete', deleteStoryController);
+// story delete Validation
+const storyValidation = [
+    body('storyId').notEmpty().withMessage("storyId is required").isString().withMessage("storyId should be string").trim(),
+];
+router.post('/create', multerMiddleware.single('media'), createStoryController);
+router.delete('/delete', storyValidation, deleteStoryController);
+router.get('/list', storyValidation, storyListController);
 
 module.exports = router;
 

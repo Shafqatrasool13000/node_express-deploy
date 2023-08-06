@@ -2,7 +2,9 @@ const Story = require('../models/storyModal');
 const { StatusCodes } = require('http-status-codes')
 const Joi = require('joi');
 const User = require('../models/userModel');
-const { fileUrlClear } = require('../utils/file');
+const { fileUrlCleaner } = require('../utils/file');
+const { validationResult } = require('express-validator');
+const { BadRequestError } = require('../errors');
 
 // story validation schema
 const storyValidationSchema = Joi.object({
@@ -81,11 +83,10 @@ const storyValidationSchema = Joi.object({
     })
 });
 
-const createStoryController = async (req, res) => {
+// create story controller
+const createStoryController = async (req, res, isError) => {
     const { userId } = req.user;
-    if (!req.file) {
-        return res.status(StatusCodes.BAD_GATEWAY).json({ error: "File is Required" });
-    }
+
     if (Object.keys(req.body).length === 0) {
         return res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({ error: "data is required" });
     }
@@ -98,22 +99,34 @@ const createStoryController = async (req, res) => {
         return res.status(StatusCodes.BAD_GATEWAY).json({ error: error.details[0].message });
     }
 
+    const storyText = storyData.storyText.trim();
+
+    if (!req.file && !storyText) {
+        return res.status(StatusCodes.BAD_GATEWAY).json({ error: "File is Required" });
+    }
+
     let imageUrl = null;
     let videoUrl = null;
-    // checking file type either video or image
-    const fileType = req.file.mimetype.split('/')[0];
-    const fileUrl = fileUrlClear(req.file.path);
 
-    if (fileType === 'image') {
-        imageUrl = fileUrl
-    } else {
-        videoUrl = fileUrl
+    // check only if story text is empty
+    if (!storyText) {
+        // checking file type either video or image
+        const fileType = req.file.mimetype.split('/')[0];
+        const fileUrl = fileUrlCleaner(req.file.path);
+        if (fileType === 'image') {
+            imageUrl = fileUrl
+        } else {
+            videoUrl = fileUrl
+        }
     }
 
     // new story creation
     const newStory = new Story(storyData);
-    newStory.imageUrl = imageUrl;
-    newStory.videoUrl = videoUrl;
+    // do only if story text is empty
+    if (!storyText) {
+        newStory.imageUrl = imageUrl;
+        newStory.videoUrl = videoUrl;
+    }
     newStory.creator = userId;
     // find existing user to save story id to it
     const existedUser = await User.findOne({ _id: userId });
@@ -121,7 +134,7 @@ const createStoryController = async (req, res) => {
     await existedUser.save();
     await newStory.save();
 
-    res.status(201).json({
+    res.status(StatusCodes.OK).json({
         responseMessage: 'Story Created Successfully',
         results: {
             story: newStory,
@@ -129,12 +142,47 @@ const createStoryController = async (req, res) => {
     })
 }
 
-const deleteStoryController = (req, res) => {
+// delete story controller
+const deleteStoryController = async (req, res) => {
+    const errors = validationResult(req);
 
-    res.send('Delete Story')
+    if (!errors.isEmpty()) {
+        return res.status(StatusCodes.BAD_REQUEST).json({ errors: errors.array() });
+    }
+
+    const { user: { userId }, body: { storyId } } = req;
+
+    const ownedStory = await Story.findOne({ creator: userId, _id: storyId });
+    if (!ownedStory) {
+        throw new BadRequestError(`Story with id ${storyId} not found`);
+    }
+    const existedUser = await User.findById(userId);
+    await Story.findByIdAndRemove(storyId);
+    existedUser.stories.pull(storyId);
+    await existedUser.save();
+
+    res.status(StatusCodes.OK).json(
+        {
+            responseMessage: "Story deleted successfully",
+        }
+    );
+
 }
 
+// post list controller
+const storyListController = async (req, res) => {
+
+    const { user: { userId } } = req;
+    const stories = await Story.find({ creator: userId });
+    res.status(StatusCodes.OK).json(
+        {
+            responseMessage: "Stories Record Fetched successfully",
+            stories
+        }
+    );
+}
 module.exports = {
     createStoryController,
-    deleteStoryController
+    deleteStoryController,
+    storyListController
 }

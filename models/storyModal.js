@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const StorySchema = new mongoose.Schema({
+    storyText: {
+        type: String,
+        trim: true,
+        default: null
+    },
     latitude: {
         type: Number,
         required: true,

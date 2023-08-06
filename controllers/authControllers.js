@@ -82,7 +82,6 @@ const signin = async (req, res) => {
 
 
     const userExist = await User.findOne({ userName });
-    console.log({ userExist })
 
     if (userExist) {
         // compare password
