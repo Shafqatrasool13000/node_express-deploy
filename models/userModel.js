@@ -38,8 +38,21 @@ const UserSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    stories: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Story"
+    }],
+    posts: [{
+        type: mongoose.Types.ObjectId,
+        ref: "Post"
+    }
+    ],
+    properties: [{
+        type: mongoose.Types.ObjectId,
+        ref: "Properties"
+    }],
     country: { type: String, default: 'Pakistan', trim: true },
-    createdBy: { type: mongoose.Schema.Types.ObjectId, default: null, trim: true },
+    createdBy: { type: mongoose.Types.ObjectId, default: null, trim: true },
     profilePicture: { type: String, default: null, trim: true },
     countryCode: { type: String, default: null, trim: true },
     deletedDateTime: { type: Date, default: null, trim: true },

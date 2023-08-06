@@ -17,7 +17,7 @@ const deletePostValidation = [
     body('firstName', validationFinder('USER_FIRSTNAME').patternMsg).trim().notEmpty().withMessage(validationFinder('USER_FIRSTNAME').notBlankMsg).matches(validationFinder('USER_FIRSTNAME').pattern),
 ];
 
-router.post('/create', multerImageMiddleware.array('images', 12), multerVideoMiddleware.single('video'), createPostController);
+router.post('/create', multerImageMiddleware.array('images', 12), multerVideoMiddleware.single('videos'), createPostController);
 router.put('/edit', multerImageMiddleware.array('images', 12), editPostController);
 router.post('/:postId', postDetailsController);
 router.delete('/delete', deletePostController);

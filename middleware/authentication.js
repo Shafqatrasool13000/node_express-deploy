@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const { UnauthenticatedError } = require('../errors')
+const userModel = require('../models/userModel')
 
 const auth = async (req, res, next) => {
   // check header
@@ -11,6 +12,10 @@ const auth = async (req, res, next) => {
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const existedUser = await userModel.findById({ _id: payload.userId });
+    if (!existedUser) {
+      throw new UnauthenticatedError('Authentication invalid')
+    }
     // attach the user to the job routes
     req.user = { userId: payload.userId, username: payload.username }
     next()

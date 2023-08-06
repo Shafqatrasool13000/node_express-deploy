@@ -14,10 +14,10 @@ const imagesStorage = multer.diskStorage({
 
 // images mimetype filters
 const imageFilesFilter = (req, file, cb) => {
-    if (appData.multiPartLimits.imagesAllowedFormatList.includes(file.mimetype)) {
+    if (appData.multiPartLimits.imagesAllowedFormatList.includes(file.mimetype) || file.mimetype === 'video/mp4') {
         cb(null, true);
     } else {
-        cb(new Error('Image is Required'), false)
+        cb(new Error('file type is not supported'), false)
     }
 }
 
@@ -27,7 +27,7 @@ const videosStorage = multer.diskStorage({
         cb(null, 'videos')
     },
     filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         cb(null, uniqueSuffix + '-' + file.originalname)
     }
 });

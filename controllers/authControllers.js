@@ -70,18 +70,19 @@ const signup = async (req, res) => {
 // sigin controller
 const signin = async (req, res) => {
 
-    const {
-        userName,
-        password
-    } = req.body;
-
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
         return res.status(StatusCodes.BAD_REQUEST).json({ errors: errors.array() });
     }
+    const {
+        userName,
+        password
+    } = req.body;
+
 
     const userExist = await User.findOne({ userName });
+    console.log({ userExist })
 
     if (userExist) {
         // compare password
