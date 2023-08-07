@@ -160,7 +160,7 @@ const editPostValidationSchema = Joi.object({
     }).messages({
         'array.base': 'imageUrls should be an array',
     }),
-    videoUrl: Joi.string().allow("").messages({
+    videoUrl: Joi.string().optional().trim().allow("").messages({
         'string.base': 'videoUrl should be a string',
     })
 });
@@ -184,6 +184,8 @@ const createPostController = async (req, res) => {
         return res.status(StatusCodes.BAD_GATEWAY).json({ error: error.details[0].message });
     }
 
+    console.log({ imageFiles, videoFile, postData })
+
     // validation for image file
     if (!imageFiles) {
         return res.status(StatusCodes.BAD_GATEWAY).json({ error: "At least one or more images are required" });
@@ -194,8 +196,8 @@ const createPostController = async (req, res) => {
         return res.status(StatusCodes.BAD_GATEWAY).json({ error: "Video file is required" });
     }
     // storing images url at once
-    const imageFilesPath = imageFiles.map((imageUrl) => fileUrlCleaner(imageUrl.path));
-    const videoFilePath = fileUrlCleaner(videoFile[0].path)
+    const imageFilesPath = imageFiles ? imageFiles.map((imageUrl) => fileUrlCleaner(imageUrl.path)) : [];
+    const videoFilePath = videoFile ? fileUrlCleaner(videoFile[0].path) : "";
 
     // new post creation
     const newPost = new Post(postData);
@@ -221,8 +223,8 @@ const createPostController = async (req, res) => {
 const editPostController = async (req, res) => {
     console.log("in post create")
     console.log(req.files, 'files of edit post')
-    const imageFiles = req.files?.images;
-    const videoFile = req.files?.video;
+    const imageFiles = req?.files?.images;
+    const videoFile = req?.files?.video;
 
 
     const { userId } = req.user;
@@ -239,7 +241,8 @@ const editPostController = async (req, res) => {
         return res.status(StatusCodes.BAD_GATEWAY).json({ error: error.details[0].message });
     }
 
-    const mediaAvailable = (!imageFiles && postData.imageUrls.length < 1) && (!videoFile && !postData.videoUrl);
+    const mediaAvailable = (!imageFiles && (postData.imageUrls && postData.imageUrls.length < 1)) && (!videoFile && !postData.videoUrl.trim());
+    console.log(((!imageFiles === 'undefined' ? true : false) && (postData.imageUrls && postData.imageUrls.length < 1)), !imageFiles, (postData.imageUrls && postData.imageUrls.length < 1), 'media available', (!videoFile && !postData.videoUrl))
     // validation for image file
     if (mediaAvailable) {
         return res.status(StatusCodes.BAD_GATEWAY).json({ error: "At least one or more images are required" });
@@ -249,34 +252,35 @@ const editPostController = async (req, res) => {
     if (mediaAvailable) {
         return res.status(StatusCodes.BAD_GATEWAY).json({ error: "Video file is required" });
     }
+    console.log({ videoFile, imageFiles, postData })
     // storing images url at once
     const imageFilesPath = imageFiles ? imageFiles.map((imageUrl) => fileUrlCleaner(imageUrl.path)) : [];
     const videoFilePath = videoFile ? fileUrlCleaner(videoFile[0].path) : "";
 
 
-    let imagesUrls = [];
+    let imageUrls = [];
     let videoUrl = "";
-
-    console.log(postData.imageUrls, 'image url in psot')
 
     // url paths for new and old images or videos
     if (imageFilesPath.length > 1) {
-        imagesUrls.push(...imageFilesPath)
+        imageUrls.push(...imageFilesPath)
     }
     if (postData.imageUrls) {
-        imagesUrls.push(...postData.imageUrls)
+        imageUrls.push(...postData.imageUrls)
     }
 
     if (videoFilePath) {
         videoUrl = videoFilePath;
     } else {
-        videoUrl = postData.videoUrl
+        videoUrl = postData.videoUrl ? postData.videoUrl.trim() : null;
     }
 
 
+    console.log({ imageUrls, videoUrl })
+
     // new post creation
     const newPost = new Post(postData);
-    newPost.imageUrls = imagesUrls;
+    newPost.imageUrls = imageUrls;
     newPost.videoUrl = videoUrl;
     newPost.creator = userId;
     await newPost.save();

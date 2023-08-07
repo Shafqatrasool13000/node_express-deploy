@@ -72,12 +72,10 @@ const PostSchema = new mongoose.Schema({
     imageUrls: [{
         type: String,
         trim: true,
-        required: true
     }],
     videoUrl: {
         type: String,
         trim: true,
-        required: true
     }
 
 });
