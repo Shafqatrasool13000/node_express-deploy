@@ -26,6 +26,8 @@ const adminRouter = require('./routes/adminRoutes');
 const userRouter = require('./routes/userRoutes');
 const postRouter = require('./routes/postRoutes');
 const storyRouter = require('./routes/storyRoutes');
+const professionalRouter = require('./routes/professionalRoutes');
+const stripeRouter = require('./routes/stripeRoutes');
 
 // error handler
 const notFoundMiddleware = require('./middleware/not-found');
@@ -62,8 +64,10 @@ app.use('/api/v1/jobs', authenticateUser, jobsRouter);
 app.use('/api/v1/getTourGuide', auth, tourGuideRouter);
 app.use('/api/v1/admin', auth, adminRouter);
 app.use('/api/v1/user', auth, userRouter);
+app.use('/api/v1/professional', auth, professionalRouter);
 app.use('/api/v1/story', auth, storyRouter);
 app.use('/api/v1/post', auth, postRouter);
+app.use('/api/v1/stripe', stripeRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
